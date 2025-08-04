@@ -1,3 +1,5 @@
 flask
 langchain
 langchain-community
+gunicorn
+
