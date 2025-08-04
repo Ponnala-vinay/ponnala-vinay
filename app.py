@@ -2,7 +2,8 @@ import os
 from flask import Flask, request, jsonify
 from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from langchain import LLMChain
+from langchain.chains import LLMChain
+
 
 # Read API key from environment variable
 api_key = os.getenv("OPENAI_API_KEY")
@@ -50,3 +51,4 @@ def generate_questions():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
