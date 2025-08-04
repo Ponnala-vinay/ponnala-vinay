@@ -1,4 +1,4 @@
 flask
 gunicorn
-langchain
-langchain-openai
+transformers
+torch
