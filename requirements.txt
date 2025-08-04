@@ -1,0 +1,4 @@
+Flask
+langchain
+openai
+nest_asyncio
