@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, jsonify
-from langchain_community.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenRouter
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
@@ -8,15 +8,14 @@ from langchain.chains import LLMChain
 api_key = os.getenv("OPENROUTER_API_KEY")
 print("🔑 OPENROUTER_API_KEY =", "✅ SET" if api_key else "❌ MISSING ❌")
 
-# ✅ Set up the LLM with OpenRouter
-llm = ChatOpenAI(
-    base_url="https://openrouter.ai/api/v1",
+# ✅ Set up LLM via OpenRouter
+llm = ChatOpenRouter(
     model="mistralai/mixtral-8x7b-instruct",
+    api_key=api_key,
     temperature=0.7,
-    openai_api_key=api_key  # 🔑 This is required even with OpenRouter
 )
 
-# ✅ Define the prompt template
+# ✅ Prompt template
 prompt_template = PromptTemplate(
     input_variables=["input_text"],
     template="""
@@ -29,10 +28,10 @@ Questions:
 """
 )
 
-# ✅ Create LangChain pipeline
+# ✅ LangChain pipeline
 question_chain = LLMChain(llm=llm, prompt=prompt_template)
 
-# ✅ Initialize Flask app
+# ✅ Flask API
 app = Flask(__name__)
 
 @app.route("/generate-questions", methods=["POST"])
