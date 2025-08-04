@@ -4,6 +4,7 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
+
 api_key = os.getenv("OPENROUTER_API_KEY")
 print("🔑 OPENROUTER_API_KEY =", "✅ SET" if api_key else "❌ MISSING ❌")
 
@@ -44,3 +45,4 @@ def generate_questions():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
