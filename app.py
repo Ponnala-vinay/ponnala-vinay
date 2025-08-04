@@ -4,16 +4,19 @@ from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-# Show if key is set
-print("🔑 OPENAI_API_KEY =", "✅ SET" if os.getenv("OPENAI_API_KEY") else "❌ MISSING ❌")
+# ✅ Read API key from environment variable
+api_key = os.getenv("OPENROUTER_API_KEY")
+print("🔑 OPENROUTER_API_KEY =", "✅ SET" if api_key else "❌ MISSING ❌")
 
-# Initialize LLM
+# ✅ Set up the LLM with OpenRouter
 llm = ChatOpenAI(
+    base_url="https://openrouter.ai/api/v1",
     model="mistralai/mixtral-8x7b-instruct",
-    temperature=0.7
+    temperature=0.7,
+    openai_api_key=api_key  # 🔑 This is required even with OpenRouter
 )
 
-# Prompt template
+# ✅ Define the prompt template
 prompt_template = PromptTemplate(
     input_variables=["input_text"],
     template="""
@@ -26,10 +29,10 @@ Questions:
 """
 )
 
-# LangChain chain
+# ✅ Create LangChain pipeline
 question_chain = LLMChain(llm=llm, prompt=prompt_template)
 
-# Flask app
+# ✅ Initialize Flask app
 app = Flask(__name__)
 
 @app.route("/generate-questions", methods=["POST"])
