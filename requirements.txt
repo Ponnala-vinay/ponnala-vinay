@@ -1,5 +1,0 @@
-Flask
-langchain
-langchain-community
-openai
-nest_asyncio
