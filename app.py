@@ -4,18 +4,18 @@ from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-
 # Read API key from environment variable
 api_key = os.getenv("OPENROUTER_API_KEY")
 print("🔑 OPENROUTER_API_KEY =", "✅ SET" if api_key else "❌ MISSING ❌")
 
-
-# Initialize the LLM
+# Initialize the LLM with correct Authorization header
 llm = ChatOpenAI(
     base_url="https://openrouter.ai/api/v1",
     model="mistralai/mixtral-8x7b-instruct",
     temperature=0.7,
-    api_key=api_key
+    default_headers={
+        "Authorization": f"Bearer {api_key}"
+    }
 )
 
 # Prompt template
@@ -53,6 +53,3 @@ def generate_questions():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
-
-
