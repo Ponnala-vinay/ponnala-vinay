@@ -6,7 +6,7 @@ from langchain.chains import LLMChain
 
 
 # Read API key from environment variable
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("OPENROUTER_API_KEY")
 
 # Initialize the LLM
 llm = ChatOpenAI(
@@ -51,4 +51,5 @@ def generate_questions():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
 
