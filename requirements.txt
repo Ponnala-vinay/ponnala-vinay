@@ -1,7 +1,4 @@
 flask
-nest_asyncio
 langchain
 langchain-community
-requests
 openai
-
