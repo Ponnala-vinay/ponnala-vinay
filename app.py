@@ -1,48 +1,61 @@
-import os
 from flask import Flask, request, jsonify
-from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-
-
-api_key = os.getenv("OPENROUTER_API_KEY")
-print("🔑 OPENROUTER_API_KEY =", "✅ SET" if api_key else "❌ MISSING ❌")
-
-llm = ChatOpenAI(
-    model="mistralai/mixtral-8x7b-instruct",
-    openai_api_key=api_key,
-    openai_api_base="https://openrouter.ai/api/v1",
-    temperature=0.7,
-)
-
-prompt_template = PromptTemplate(
-    input_variables=["input_text"],
-    template="""
-You are a helpful assistant. Read the following text and generate 5 clear, concise, and relevant questions from it.
-
-Text:
-{input_text}
-
-Questions:
-"""
-)
-
-question_chain = LLMChain(llm=llm, prompt=prompt_template)
+import requests
+import os
 
 app = Flask(__name__)
 
-@app.route("/generate-questions", methods=["POST"])
-def generate_questions():
-    data = request.get_json()
-    text = data.get("text")
-    if not text:
-        return jsonify({"error": "Missing 'text' field"}), 400
+# Read API key from environment variables
+API_KEY = os.getenv("OPENROUTER_API_KEY")
+MODEL = "mistralai/mixtral-8x7b-instruct"
+URL = "https://openrouter.ai/api/v1/chat/completions"
+
+def call_openrouter(sentence):
+    """Send a request to OpenRouter API to generate follow-up questions using Mistral."""
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    prompt = f"""
+    You are a helpful assistant. Based on the following text, generate 5 clear, concise, and relevant follow-up questions.
+
+    Text:
+    "{sentence}"
+
+    Questions:
+    """
+
+    payload = {
+        "model": MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 200,
+        "temperature": 0.7
+    }
+
     try:
-        questions = question_chain.run({"input_text": text})
-        return jsonify({"questions": questions.strip()})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        response = requests.post(URL, headers=headers, json=payload)
+        response.raise_for_status()
+        result = response.json()
+        return result['choices'][0]['message']['content'].strip()
+    except requests.exceptions.RequestException as e:
+        return f"Request Error: {str(e)}"
+    except KeyError:
+        return "Error: Unexpected API response format."
+
+@app.route('/generate-questions', methods=['POST'])
+def generate_questions():
+    """API endpoint to generate questions from given text using Mistral LLM."""
+    data = request.get_json()
+    if not data or 'sentence' not in data:
+        return jsonify({"error": "Please provide 'sentence' in JSON body."}), 400
+
+    sentence = data['sentence']
+    questions = call_openrouter(sentence)
+
+    if questions.startswith("Error:") or questions.startswith("Request Error:"):
+        return jsonify({"error": questions}), 500
+
+    return jsonify({"questions": questions})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-
+    app.run(host='0.0.0.0', port=5000, debug=False)
