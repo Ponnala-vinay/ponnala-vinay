@@ -9,8 +9,11 @@ API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL = "mistralai/mixtral-8x7b-instruct"
 URL = "https://openrouter.ai/api/v1/chat/completions"
 
-def call_openrouter(sentence):
+def call_openrouter(text):
     """Send a request to OpenRouter API to generate follow-up questions using Mistral."""
+    if not API_KEY:
+        return "Error: OPENROUTER_API_KEY not set."
+
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
@@ -37,20 +40,26 @@ def call_openrouter(sentence):
         response.raise_for_status()
         result = response.json()
         return result['choices'][0]['message']['content'].strip()
+    except requests.exceptions.HTTPError:
+        return f"Request Error: {response.status_code} - {response.text}"
     except requests.exceptions.RequestException as e:
         return f"Request Error: {str(e)}"
     except KeyError:
         return "Error: Unexpected API response format."
 
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "API is running. Use POST /generate-questions."})
+
 @app.route('/generate-questions', methods=['POST'])
 def generate_questions():
     """API endpoint to generate questions from given text using Mistral LLM."""
     data = request.get_json()
-    if not data or 'sentence' not in data:
-        return jsonify({"error": "Please provide 'sentence' in JSON body."}), 400
+    if not data or 'text' not in data:
+        return jsonify({"error": "Please provide 'text' in JSON body."}), 400
 
-    sentence = data['sentence']
-    questions = call_openrouter(sentence)
+    text = data['text']
+    questions = call_openrouter(text)
 
     if questions.startswith("Error:") or questions.startswith("Request Error:"):
         return jsonify({"error": questions}), 500
@@ -59,4 +68,3 @@ def generate_questions():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=False)
-
