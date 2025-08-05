@@ -6,6 +6,7 @@ app = Flask(__name__)
 
 # Read API key from environment variables
 API_KEY = os.getenv("OPENROUTER_API_KEY")
+print("Loaded API Key:", "SET" if API_KEY else "NOT SET")
 MODEL = "mistralai/mixtral-8x7b-instruct"
 URL = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -68,3 +69,4 @@ def generate_questions():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=False)
+
