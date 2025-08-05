@@ -20,7 +20,7 @@ def call_openrouter(sentence):
     You are a helpful assistant. Based on the following text, generate 5 clear, concise, and relevant follow-up questions.
 
     Text:
-    "{sentence}"
+    "{text}"
 
     Questions:
     """
@@ -59,3 +59,4 @@ def generate_questions():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=False)
+
